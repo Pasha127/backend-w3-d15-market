@@ -15,4 +15,4 @@ const productDbSchema = new Schema(
     {timestamps: true}
   )
   
-  export default model("Product", blogDbSchema)
+  export default model("Product", productDbSchema)

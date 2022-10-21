@@ -10,7 +10,7 @@ const reviewSchema = {
   },
   rate: {
     in: ["body"],
-    isNumber: {
+    isInt: {
       errorMessage: "Rating is a mandatory field and needs to be a number! (1-5)",
     },
   }

@@ -8,4 +8,4 @@ const reviewDbSchema = new Schema(
     {timestamps: true}
   )
   
-  export default model("Review", blogDbSchema)
+  export default model("Review", reviewDbSchema)

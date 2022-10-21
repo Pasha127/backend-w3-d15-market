@@ -3,10 +3,21 @@ import { checkReviewSchema, checkValidationResult } from "./validator.js"
 import createHttpError from "http-errors";
 import reviewModel from "./model.js";
 import q2m from "query-to-mongo";
+import multer from "multer"; 
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const localEndpoint=`${process.env.LOCAL_URL}${process.env.PORT}/reviews`
 /* const serverEndpoint= `${process.env.SERVER_URL}/reviewss` */
 
+
+const cloudinaryUploader = multer({
+    storage: new CloudinaryStorage({
+      cloudinary, 
+      params: {folder: "Products"},
+    }),
+    limits: { fileSize: 1024 * 1024 },
+  }).single("image")
 
 const reviewRouter = express.Router();
 
