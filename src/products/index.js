@@ -166,15 +166,18 @@ productRouter.get("/:productId/reviews" , async (req,res,next)=>{
 
 productRouter.put("/:productId/reviews/:reviewId" , async (req,res,next)=>{
     try{
-        console.log(req.headers.origin, "GET product at:", new Date());       
+        console.log(req.headers.origin, "PUT product at:", new Date());       
         const foundProduct = await productModel.findById(req.params.productId);
-        if(foundProduct){
+        if(foundProduct){            
             const foundReviewIndex = foundProduct.reviews.findIndex(review => review._id.toString()===req.params.reviewId);
-            if(foundReviewIndex>-1){
-                const reviewsArr = foundProduct.toObject().reviews;
-                const newReviewsArr = reviewsArr.splice(foundReviewIndex,1,{...reviewsArr[foundReviewIndex], ...req.body})
-                const updatedId = await productModel.findOneAndUpdate(req.params.productId,{reviews: newReviewsArr},{new:true});
-            res.status(200).send({message: "Review updated successfully!",_id:updatedId});
+            if(foundReviewIndex>-1){                
+                foundProduct.reviews[foundReviewIndex] = {
+                    ...foundProduct.reviews[foundReviewIndex],
+                    ...req.body
+                }
+                await foundProduct.save()
+               
+            res.status(200).send({message: "Review updated successfully!"});
             }else{next(createHttpError(404, "Review Not Found"));}
         }else{next(createHttpError(404, "Product Not Found"));
     } 
@@ -182,17 +185,36 @@ productRouter.put("/:productId/reviews/:reviewId" , async (req,res,next)=>{
         console.log(error);
     }
 })
+/* productRouter.put("/:productId/reviews/:reviewId" , async (req,res,next)=>{
+    try{
+        console.log(req.headers.origin, "PUT product at:", new Date());       
+        const foundProduct = await productModel.findById(req.params.productId);
+        if(foundProduct){
+            const foundReviewIndex = foundProduct.reviews.findIndex(review => review._id.toString()===req.params.reviewId);
+            if(foundReviewIndex>-1){
+                const reviewsArr = foundProduct.toObject().reviews;
+                reviewsArr[foundReviewIndex] = {...reviewsArr[foundReviewIndex], ...req.body}
+                const updatedId = await productModel.findByIdAndUpdate(req.params.productId,{reviews: reviewsArr},{new:true})
+            res.status(200).send({message: "Review updated successfully!",_id:updatedId});
+            }else{next(createHttpError(404, "Review Not Found"));}
+        }else{next(createHttpError(404, "Product Not Found"));
+    } 
+    }catch(error){
+        console.log(error);
+    }
+}) */
 
 productRouter.delete("/:productId/reviews/:reviewId" , async (req,res,next)=>{
     try{
-        console.log(req.headers.origin, "GET product at:", new Date());       
+        console.log(req.headers.origin, "DELETE product at:", new Date());       
         const foundProduct = await productModel.findById(req.params.productId)       
         if(foundProduct){
             const foundReview = foundProduct.reviews.find(review => review._id.toString()===req.params.reviewId)
             console.log(foundReview)
             const foundReviewIndex = foundProduct.reviews.findIndex(review => review._id.toString()===req.params.reviewId)
             if(foundReviewIndex>-1){
-                const deletedReview = await productModel.findOneAndUpdate(req.params.productId,{$pull:{reviews:{_id: req.params.reviewId}}},{new:true});
+                const deletedReview = await productModel.findByIdAndUpdate(req.params.productId,{$pull:{reviews:{_id: req.params.reviewId}}},{new:true});
+                console.log(deletedReview)
             res.status(200).send(foundReview);
             }else{next(createHttpError(404, "Review Not Found"));}
         }else{next(createHttpError(404, "Product Not Found"));
